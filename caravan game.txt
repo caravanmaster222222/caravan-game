@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Caravan - Simple Version</title>
+  <style>
+    body {
+      background-color: #2d2d2d;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    .caravans, .hand {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .caravan, .card {
+      border: 2px solid #fff;
+      padding: 10px;
+      background: #444;
+      min-width: 60px;
+      min-height: 90px;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      cursor: pointer;
+      background-color: #eee;
+      color: #000;
+      font-weight: bold;
+    }
+    .controls {
+      margin-top: 20px;
+    }
+    #message {
+      margin-top: 15px;
+      color: #ffd700;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Caravan - Simple Version</h1>
+    <div class="caravans">
+      <div class="caravan" id="caravan-0"></div>
+      <div class="caravan" id="caravan-1"></div>
+      <div class="caravan" id="caravan-2"></div>
+    </div>
+    <div class="hand" id="hand"></div>
+    <div class="controls">
+      <button onclick="startGame()">Restart</button>
+      <div id="message"></div>
+    </div>
+  </div>
+
+
+  <script>
+    let deck = [], hand = [], caravans = [[], [], []];
+
+
+    function createDeck() {
+      const d = [];
+      for (let i = 2; i <= 10; i++) {
+        for (let j = 0; j < 4; j++) d.push(i);
+      }
+      return d.sort(() => Math.random() - 0.5);
+    }
+
+
+    function drawHand() {
+      hand = [];
+      for (let i = 0; i < 8; i++) {
+        hand.push(deck.pop());
+      }
+    }
+
+
+    function render() {
+      for (let i = 0; i < 3; i++) {
+        const div = document.getElementById(`caravan-${i}`);
+        div.innerHTML = `<strong>Caravan ${i+1}</strong><br/>Total: ${sum(caravans[i])}`;
+        caravans[i].forEach(card => {
+          const cardEl = document.createElement('div');
+          cardEl.className = 'card';
+          cardEl.textContent = card;
+          div.appendChild(cardEl);
+        });
+      }
+
+
+      const handDiv = document.getElementById('hand');
+      handDiv.innerHTML = '';
+      hand.forEach((card, idx) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'card';
+        cardEl.textContent = card;
+        cardEl.onclick = () => placeCard(idx);
+        handDiv.appendChild(cardEl);
+      });
+    }
+
+
+    function sum(arr) {
+      return arr.reduce((a, b) => a + b, 0);
+    }
+
+
+    function placeCard(handIndex) {
+      const caravanNum = parseInt(prompt("Place card into Caravan 1, 2, or 3?"), 10) - 1;
+      if (caravanNum < 0 || caravanNum > 2) return;
+      caravans[caravanNum].push(hand[handIndex]);
+      hand.splice(handIndex, 1);
+      checkWin();
+      render();
+    }
+
+
+    function checkWin() {
+      const valid = caravans.map(sum).filter(val => val >= 21 && val <= 26).length;
+      if (valid >= 2) {
+        document.getElementById("message").textContent = "🎉 You win! You have 2 valid caravans.";
+      }
+    }
+
+
+    function startGame() {
+      deck = createDeck();
+      caravans = [[], [], []];
+      drawHand();
+      document.getElementById("message").textContent = '';
+      render();
+    }
+
+
+    startGame();
+  </script>
+</body>
+</html>
